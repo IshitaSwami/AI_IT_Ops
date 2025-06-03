@@ -1,0 +1,3 @@
+The Lambda function that generates log is integrated with IAM Role - LambdaExecutionRole which has two policies -
+One - AWS Lambda Basic Execution Role
+Other - CloudWatch Write Policy
