@@ -1,0 +1,38 @@
+import boto3
+
+def fetch_latest_logs_to_file(log_group_name, output_file='logs.txt'):
+    client = boto3.client('logs')
+
+    # Get the latest log stream
+    streams = client.describe_log_streams(
+        logGroupName=log_group_name,
+        orderBy='LastEventTime',
+        descending=True,
+        limit=1
+    )
+
+    if not streams['logStreams']:
+        print("No log streams found in log group:", log_group_name)
+        return
+
+    latest_stream = streams['logStreams'][0]['logStreamName']
+    print(f"Fetching logs from stream: {latest_stream}")
+
+    # Fetch log events from the latest log stream
+    response = client.get_log_events(
+        logGroupName=log_group_name,
+        logStreamName=latest_stream,
+        startFromHead=True
+    )
+
+    # Write log messages to output file
+    with open(output_file, 'w', encoding='utf-8') as f:
+        for event in response['events']:
+            f.write(event['message'] + '\n')
+
+    print(f"Logs saved to {output_file}")
+
+
+if __name__ == "__main__":
+  log_group = '/aws/lambda/LogGenerate'
+  fetch_latest_logs_to_file(log_group)
